@@ -49,7 +49,68 @@ document.addEventListener("DOMContentLoaded", function() {
 	});
 	// END SCROLLING ANIM
 
-	let questions = qsa('.question');
+	if(qs('.glide')) {
+		let glide = new Glide(qs('.glide.team'), {
+		  type: 'carousel',
+		  perView: 1,
+		  gap: 0
+		}).mount();
+
+		let glide3col = new Glide(qs('.glide.icons'), {
+		  type: 'slider',
+		  rewind: false,
+		  bound: true,
+		  perView: 5,
+		  startAt: 0,
+		  gap: 50,
+		  breakpoints: {
+		    1023: {
+		      perView: 3,
+		      gap: 40
+		    },
+		    767: {
+		      perView: 2
+		    },
+		    500: {
+		      perView: 1,
+		      gap: 0
+		    }
+		  }
+		})
+		function initBullets () {
+			let qty = qsa('.icons .glide__slide').length,
+				bullets = qs('.icons .glide__bullets');
+
+			if(window.innerWidth > 767) {
+				qty = qty - 2;
+			} else if (window.innerWidth > 500) {
+				qty = qty - 1;
+			} else {
+				qty = qty;
+			}
+			bullets.innerHTML = '';
+
+			for(let i = 0; i < qty; i++) {
+				let bullet = document.createElement("button");
+				bullet.classList.add('glide__bullet');
+				bullet.dataset.glideDir = `=${i}`;
+				bullet.onclick = () => {
+					glide3col.go(bullet.dataset.glideDir);
+				}
+				bullets.appendChild(bullet);
+			}
+		}
+
+		initBullets();
+		glide3col.mount();
+
+		window.onresize = () => {
+			glide3col.update();
+			initBullets();
+		}
+	}
+
+	let questions = qsa('.question:not(.static)');
 
 	if (questions.length) {
 		questions.forEach(el => {
@@ -65,6 +126,16 @@ document.addEventListener("DOMContentLoaded", function() {
 			};
 		})
 		qs('.answer').style.height = qs('.answer').scrollHeight + 'px';
+
+		window.onresize = () => {
+			qsa('.question.active:not(.static)').forEach(el => {
+				let answer = el.nextElementSibling;
+				answer.style.height = 'auto';
+				setTimeout(() => {
+					answer.style.height = answer.scrollHeight + 'px';
+				}, 300)
+			})
+		}
 	} 
 
 	// LINE SCROLL ANIMATION
